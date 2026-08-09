@@ -8,6 +8,7 @@ import { type FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { useProjects } from '@/components/projects/ProjectProvider';
+import { projectFormSchema } from '@/lib/validation/project';
 
 import type {
   Project,
@@ -35,42 +36,40 @@ export function ProjectForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function validateForm() {
-    const newErrors: FormErrors = {};
-
-    if (!name.trim()) {
-      newErrors.name = 'Name is required.';
-    }
-
-    if (!description.trim()) {
-      newErrors.description = 'Description is required.';
-    }
-
-    if (!author.trim()) {
-      newErrors.author = 'Author is required.';
-    }
-
-    if (!technologies.trim()) {
-      newErrors.technologies =
-        'Technologies are required.';
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  }
-
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>,
   ) {
     event.preventDefault();
 
-    const isValid = validateForm();
+    const result = projectFormSchema.safeParse({
+      name,
+      description,
+      status,
+      author,
+      technologies,
+    });
 
-    if (!isValid) {
+    if (!result.success) {
+      const fieldErrors: FormErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0];
+
+        if (
+          field === 'name' ||
+          field === 'description' ||
+          field === 'author' ||
+          field === 'technologies'
+        ) {
+          fieldErrors[field] = issue.message;
+        }
+      });
+
+      setErrors(fieldErrors);
       return;
     }
 
+    setErrors({});
     setIsSubmitting(true);
 
     try {
@@ -80,11 +79,11 @@ export function ProjectForm() {
 
       const newProject: Project = {
         id: crypto.randomUUID(),
-        name: name.trim(),
-        description: description.trim(),
-        status,
-        author: author.trim(),
-        technologies: technologies
+        name: result.data.name,
+        description: result.data.description,
+        status: result.data.status,
+        author: result.data.author,
+        technologies: result.data.technologies
           .split(',')
           .map((technology) => technology.trim())
           .filter(Boolean),
@@ -118,7 +117,9 @@ export function ProjectForm() {
           id="name"
           type="text"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) =>
+            setName(event.target.value)
+          }
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900"
         />
 
@@ -174,9 +175,11 @@ export function ProjectForm() {
           <option value="planned">
             Planned
           </option>
+
           <option value="in-progress">
             In progress
           </option>
+
           <option value="completed">
             Completed
           </option>

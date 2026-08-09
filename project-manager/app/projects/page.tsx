@@ -6,7 +6,8 @@ import Link from 'next/link';
 
 import { ProjectsClient } from '@/components/projects/ProjectsClient';
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  await new Promise((resolve) => setTimeout(resolve, 500));
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
