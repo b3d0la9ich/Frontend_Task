@@ -2,24 +2,22 @@
 //      Для хранения строки поиска, фильтра проектов и сортировки по дате
 //
 
-'use client'; // Обозначает что этот компонент должен работать в браузере и может использовать usestate, обработчики событий и другую клиентскую интерактивность
+'use client';
 
 import { useMemo, useState } from 'react';
 
 import { ProjectList } from '@/components/projects/ProjectList';
-
-import type { Project } from '@/types/project';
-
-interface ProjectsClientProps {
-  projects: Project[];
-}
+import { useProjects } from '@/components/projects/ProjectProvider';
 
 type SortOrder = 'newest' | 'oldest';
 
-export function ProjectsClient({ projects }: ProjectsClientProps) {
+export function ProjectsClient() {
+  const { projects } = useProjects();
+
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
+  const [sortOrder, setSortOrder] =
+    useState<SortOrder>('newest');
 
   const filteredProjects = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
