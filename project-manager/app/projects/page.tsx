@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ProjectsClient } from '@/components/projects/ProjectsClient';
 
 export default function ProjectsPage() {
+  //await new Promise((resolve) => setTimeout(resolve, 1000)); искуственная задержка в сек
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-4">
